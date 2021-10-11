@@ -1,7 +1,7 @@
 package com.lyokone.location.hadler
 
 import android.util.Log
-import com.lyokone.location.FlutterLocation
+import com.lyokone.location.service.FlutterLocationService
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
@@ -12,7 +12,7 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
         private const val STREAM_CHANNEL_NAME = "lyokone/locationstream"
     }
 
-    private var location: FlutterLocation? = null
+    var locationService: FlutterLocationService? = null
     private var channel: EventChannel? = null
 
     /**
@@ -24,6 +24,7 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
             Log.wtf(TAG, "Setting a method call handler before the last was disposed.")
             stopListening()
         }
+
         channel = EventChannel(messenger, STREAM_CHANNEL_NAME).apply {
             setStreamHandler(this@StreamHandlerImpl)
         }
@@ -42,12 +43,11 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
         channel = null
     }
 
-    override fun onListen(arguments: Any, eventsSink: EventSink) {
-        location?.startRequestingLocation(sink = eventsSink)
+    override fun onListen(arguments: Any?, eventsSink: EventSink) {
+        locationService?.requestLocationUpdates(sink = eventsSink)
     }
 
-    override fun onCancel(arguments: Any) {
-        location?.dispose()
+    override fun onCancel(arguments: Any?) {
+        locationService?.cancelStream()
     }
-
 }

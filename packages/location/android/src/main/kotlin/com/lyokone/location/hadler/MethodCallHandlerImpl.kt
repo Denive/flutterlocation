@@ -26,7 +26,7 @@ internal class MethodCallHandlerImpl : MethodCallHandler {
             "hasPermission" -> onHasPermission(result)
             "serviceEnabled" -> onServiceEnabled(result)
             "isBackgroundModeEnabled" -> isForegroundServiceEnabled(result)
-            "enableBackgroundMode" -> enableForegroundServiceMode(result)
+            "enableBackgroundMode" -> enableForegroundServiceMode(result, call)
             "changeNotificationOptions" -> onChangeNotificationOptions(call, result)
             "requestPermission" -> result.notImplemented()
             "requestService" -> result.notImplemented()
@@ -34,11 +34,11 @@ internal class MethodCallHandlerImpl : MethodCallHandler {
         }
     }
 
-    private fun enableForegroundServiceMode(result: MethodChannel.Result) {
+    private fun enableForegroundServiceMode(result: MethodChannel.Result, call: MethodCall) {
         if (locationService != null) {
-            locationService?.isForegroundLocationEnabled = true
+            locationService?.isForegroundLocationEnabled = call.argument<Boolean>("enable") == true
 
-            result.success(null)
+            result.success(if (locationService?.isForegroundLocationEnabled == true) 1 else 0)
         } else {
             result.error(
                 "SERVICE_STATUS_ERROR",
@@ -127,7 +127,6 @@ internal class MethodCallHandlerImpl : MethodCallHandler {
     }
 
     private fun onChangeNotificationOptions(call: MethodCall, result: MethodChannel.Result) {
-
         try {
             val options = NotificationOptions(call)
 

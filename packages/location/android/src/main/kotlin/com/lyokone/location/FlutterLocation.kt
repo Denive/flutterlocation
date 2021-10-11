@@ -12,10 +12,12 @@ import com.lyokone.location.model.*
 import io.flutter.plugin.common.EventChannel.EventSink
 import io.flutter.plugin.common.MethodChannel
 
-class FlutterLocation(private val context: Context, private val lopper: Looper) {
+class FlutterLocation(
+    private val context: Context,
+    private val lopper: Looper,
+    private val mainLooper: Looper
+) {
     companion object {
-        private const val TAG = "FlutterLocation"
-
         private const val ONE_LOCATION_CALLBACK = 1
         private const val STREAM_LOCATION_CALLBACK = 2
     }
@@ -35,10 +37,7 @@ class FlutterLocation(private val context: Context, private val lopper: Looper) 
 
     fun changeSettings(updatedSettings: LocationSettings) {
         settings = updatedSettings
-
-        callbacks.values.takeWhile { it != null }.forEach {
-            it?.updateSettings(settings)
-        }
+        callbacks[STREAM_LOCATION_CALLBACK]?.updateSettings(settings)
     }
 
     /**
@@ -80,7 +79,11 @@ class FlutterLocation(private val context: Context, private val lopper: Looper) 
     fun startRequestingLocation(sink: EventSink) {
         callbacks[STREAM_LOCATION_CALLBACK]?.dispose()
         callbacks[STREAM_LOCATION_CALLBACK] =
-            StreamFlutterLocationCallback(sink, lopper, fusedLocationClient, settings)
+            StreamFlutterLocationCallback(sink, lopper, mainLooper, fusedLocationClient, settings)
+    }
+
+    fun cancelRequestingLocation() {
+        callbacks[STREAM_LOCATION_CALLBACK]?.dispose()
     }
 
 

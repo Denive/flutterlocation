@@ -19,13 +19,23 @@ class FlutterLocationService : Service() {
     companion object {
         private const val TAG = "FlutterLocationService"
 
-        private const val REQUEST_PERMISSIONS_REQUEST_CODE: Int = 641
-
         private const val ONGOING_NOTIFICATION_ID = 75418
         private const val CHANNEL_ID = "flutter_location_channel_01"
     }
 
-    var isForegroundLocationEnabled: Boolean = false
+    private var _isForegroundLocationEnabled: Boolean = false
+
+    var isForegroundLocationEnabled: Boolean
+        get() = _isForegroundLocationEnabled
+        set(value) {
+            if (value)
+                startForeground(ONGOING_NOTIFICATION_ID, notification.build())
+            else {
+                stopForeground(true)
+            }
+
+            _isForegroundLocationEnabled = value
+        }
 
     lateinit var flutterLocation: FlutterLocation
 
@@ -49,7 +59,7 @@ class FlutterLocationService : Service() {
         handlerThread.start()
 
         serviceHandler = Handler(handlerThread.looper)
-        flutterLocation = FlutterLocation(this, handlerThread.looper)
+        flutterLocation = FlutterLocation(this, handlerThread.looper, mainLooper)
 
         notification = BackgroundNotification(
             context = this,
@@ -60,7 +70,7 @@ class FlutterLocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 // TODO
-//        Log.i(TAG, "Service started")
+        Log.i(TAG, "Service started")
 //
 //
 //        val startedFromNotification = intent?.getBooleanExtra(
@@ -83,46 +93,46 @@ class FlutterLocationService : Service() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        changingConfiguration = true;
+        changingConfiguration = true
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         // Called when a client (MainActivity in case of this sample) comes to the foreground
         // and binds with this service. The service should cease to be a foreground service
         // when that happens.
-        Log.i(TAG, "in onBind()");
-        stopForeground(true);
-        changingConfiguration = false;
+//        Log.i(TAG, "in onBind()")
+//        stopForeground(true)
+//        changingConfiguration = false
 
-        return binder;
+        return binder
     }
 
     override fun onRebind(intent: Intent?) {
         // Called when a client (MainActivity in case of this sample) returns to the foreground
         // and binds once again with this service. The service should cease to be a foreground
         // service when that happens.
-        Log.i(TAG, "in onRebind()")
-        stopForeground(true)
-        changingConfiguration = false
-        super.onRebind(intent);
+//        Log.i(TAG, "in onRebind()")
+//        stopForeground(true)
+//        changingConfiguration = false
+        super.onRebind(intent)
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.i(TAG, "Last client unbound from service");
+        Log.i(TAG, "Last client unbound from service")
 
         // Called when the last client (MainActivity in case of this sample) unbinds from this
         // service. If this method is called due to a configuration change in MainActivity, we
         // do nothing. Otherwise, we make this service a foreground service.
-        if (!changingConfiguration && flutterLocation.isForegroundLocationEnabled) {
-            Log.i(TAG, "Starting foreground service");
+//        if (!changingConfiguration && flutterLocation.isForegroundLocationEnabled) {
+//            Log.i(TAG, "Starting foreground service")
+//
+//            startForeground(
+//                ONGOING_NOTIFICATION_ID,
+//                notification.build()
+//            )
+//        }
 
-            startForeground(
-                ONGOING_NOTIFICATION_ID,
-                notification.build()
-            );
-        }
-
-        return true; // Ensures onRebind() is called when a client re-binds.
+        return true // Ensures onRebind() is called when a client re-binds.
     }
 
     override fun onDestroy() {
@@ -176,7 +186,16 @@ class FlutterLocationService : Service() {
     }
 
     fun changeNotificationOptions(options: NotificationOptions): Map<String, Any>? {
-        return mapOf()
+        notification.updateOptions(options, isForegroundLocationEnabled)
+
+        return if (isForegroundLocationEnabled)
+            mapOf("channelId" to CHANNEL_ID, "notificationId" to ONGOING_NOTIFICATION_ID)
+        else
+            null
+    }
+
+    fun cancelStream() {
+        flutterLocation.cancelRequestingLocation()
     }
 
     inner class LocalBinder : Binder() {

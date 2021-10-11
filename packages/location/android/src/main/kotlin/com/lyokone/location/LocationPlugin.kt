@@ -83,8 +83,11 @@ class LocationPlugin : FlutterPlugin, ActivityAware {
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             Log.d(TAG, "Service connected: $name")
+
             locationService = ((service as FlutterLocationService.LocalBinder).service)
+
             methodCallHandler?.locationService = locationService
+            streamHandlerImpl?.locationService = locationService
         }
 
         override fun onServiceDisconnected(name: ComponentName) {

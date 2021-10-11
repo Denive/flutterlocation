@@ -1,6 +1,8 @@
 package com.lyokone.location.model
 
+import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.CancellationTokenSource
 import io.flutter.plugin.common.EventChannel
@@ -27,22 +29,12 @@ class MethodFlutterLocationCallback(
 
     init {
         requestLocation(settings.locationAccuracy)
-        fusedLocationClient.getCurrentLocation(settings.locationAccuracy, cts.token)
-            .addOnSuccessListener {
-                val location = LocationData(it)
-
-                result.success(location.toMap())
-                isSend = true
-            }.addOnFailureListener {
-                result.error("GET_LOCATION_ERROR", it.localizedMessage, it)
-                isSend = true
-            }
     }
 
 
     override fun updateSettings(settings: LocationSettings) {}
 
-    override fun dispose(errorData: ErrorData? = null) {
+    override fun dispose(errorData: ErrorData?) {
         if (!isSend) {
             if (errorData == null) {
                 result.success(null)
@@ -59,8 +51,10 @@ class MethodFlutterLocationCallback(
             val location = LocationData(it)
 
             result.success(location.toMap())
+            isSend = true
         }.addOnFailureListener {
             result.error("GET_LOCATION_ERROR", it.localizedMessage, it)
+            isSend = true
         }
     }
 }
@@ -68,11 +62,13 @@ class MethodFlutterLocationCallback(
 class StreamFlutterLocationCallback(
     private val sink: EventChannel.EventSink,
     private val looper: Looper,
+    mainLooper: Looper,
     fusedLocationClient: FusedLocationProviderClient,
     settings: LocationSettings
 ) : FlutterLocationCallback(fusedLocationClient) {
 
     private val locationCallback = createLocationCallback(sink)
+    private val mainHandler = Handler(mainLooper)
 
     init {
         requestLocation(settings)
@@ -89,6 +85,7 @@ class StreamFlutterLocationCallback(
 
         sink.endOfStream()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        mainHandler.removeCallbacksAndMessages(null)
     }
 
     private fun requestLocation(settings: LocationSettings) {
@@ -113,10 +110,10 @@ class StreamFlutterLocationCallback(
      */
     private fun createLocationRequest(settings: LocationSettings): LocationRequest {
         return LocationRequest.create()
-            .setInterval(settings.updateIntervalMilliseconds)
-            .setFastestInterval(settings.fastestUpdateIntervalMilliseconds)
+            .setInterval(settings.updateIntervalMilliseconds.toLong())
+            .setFastestInterval(settings.fastestUpdateIntervalMilliseconds.toLong())
             .setPriority(settings.locationAccuracy)
-            .setSmallestDisplacement(settings.distanceFilter)
+            .setSmallestDisplacement(settings.distanceFilter.toFloat())
     }
 
     private fun createLocationCallback(sink: EventChannel.EventSink): LocationCallback {
@@ -126,18 +123,14 @@ class StreamFlutterLocationCallback(
 
                 val location = LocationData(locationResult.lastLocation)
 
-                sink.success(location.toMap())
+                mainHandler.post {
+                    Log.d("asdas", "asdasdasdasda")
+                    sink.success(location.toMap())
+                }
             }
 
             override fun onLocationAvailability(locationAvailabity: LocationAvailability) {
                 super.onLocationAvailability(locationAvailabity)
-
-                if (!locationAvailabity.isLocationAvailable)
-                    sink.error(
-                        "LOCATION_UNAVAILABLE",
-                        "You should check enable status for location service.",
-                        null
-                    )
             }
         }
     }

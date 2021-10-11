@@ -5,10 +5,11 @@ import io.flutter.plugin.common.MethodCall
 
 data class LocationSettings(
     val locationAccuracy: Int,
-    val updateIntervalMilliseconds: Long,
-    val fastestUpdateIntervalMilliseconds: Long,
-    val distanceFilter: Float
+    val updateIntervalMilliseconds: Int,
+    val distanceFilter: Double
 ) {
+    val fastestUpdateIntervalMilliseconds: Int
+        get() = updateIntervalMilliseconds / 2
 
     companion object {
         private val FLUTTER_ACCURACY: Map<Int, Int> = mapOf(
@@ -20,15 +21,14 @@ data class LocationSettings(
             Pair(5, LocationRequest.PRIORITY_LOW_POWER),
         )
 
-        private const val DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 5000L
-        private const val DEFAULT_DISTANCE_FILTER: Float = 0f
+        private const val DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS: Int = 5000
+        private const val DEFAULT_DISTANCE_FILTER: Double = 0.0
         private const val DEFAULT_LOCATION_ACCURACY: Int = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
     constructor() : this(
         locationAccuracy = DEFAULT_LOCATION_ACCURACY,
         updateIntervalMilliseconds = DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS,
-        fastestUpdateIntervalMilliseconds = DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS / 2,
         distanceFilter = DEFAULT_DISTANCE_FILTER
     )
 
@@ -36,11 +36,9 @@ data class LocationSettings(
         locationAccuracy = call.argument<Int>("accuracy")?.let {
             FLUTTER_ACCURACY[it] ?: DEFAULT_LOCATION_ACCURACY
         } ?: DEFAULT_LOCATION_ACCURACY,
-        updateIntervalMilliseconds = call.argument<Long>("interval")
+        updateIntervalMilliseconds = call.argument<Int>("interval")
             ?: DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS,
-        fastestUpdateIntervalMilliseconds = (call.argument<Long>("interval")
-            ?: DEFAULT_UPDATE_INTERVAL_IN_MILLISECONDS) / 2,
-        distanceFilter = call.argument<Float>("distanceFilter")
+        distanceFilter = call.argument<Double>("distanceFilter")
             ?: DEFAULT_DISTANCE_FILTER
     )
 }
