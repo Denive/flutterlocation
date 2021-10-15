@@ -124,7 +124,6 @@ class StreamFlutterLocationCallback(
                 val location = LocationData(locationResult.lastLocation)
 
                 mainHandler.post {
-                    Log.d("asdas", "asdasdasdasda")
                     sink.success(location.toMap())
                 }
             }
