@@ -11,14 +11,12 @@ import com.lyokone.location.hadler.StreamHandlerImpl
 import com.lyokone.location.service.FlutterLocationService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
-import io.flutter.embedding.engine.plugins.activity.ActivityAware
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 
 /**
  * LocationPlugin
  */
-class LocationPlugin : FlutterPlugin, ActivityAware {
+class LocationPlugin : FlutterPlugin {
     companion object {
         private const val TAG = "LocationPlugin"
     }
@@ -27,9 +25,14 @@ class LocationPlugin : FlutterPlugin, ActivityAware {
     private var streamHandlerImpl: StreamHandlerImpl? = null
 
     private var locationService: FlutterLocationService? = null
-    private var activityBinding: ActivityPluginBinding? = null
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
+        binding.applicationContext.bindService(
+            Intent(binding.applicationContext, FlutterLocationService::class.java),
+            serviceConnection,
+            Context.BIND_AUTO_CREATE
+        )
+
         methodCallHandler = MethodCallHandlerImpl().apply {
             startListening(binding.binaryMessenger)
         }
@@ -46,39 +49,6 @@ class LocationPlugin : FlutterPlugin, ActivityAware {
         streamHandlerImpl?.stopListening()
         streamHandlerImpl = null
     }
-
-    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        attachToActivity(binding)
-    }
-
-    override fun onDetachedFromActivity() {
-        detachActivity()
-    }
-
-    override fun onDetachedFromActivityForConfigChanges() {
-        detachActivity()
-    }
-
-    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        attachToActivity(binding)
-    }
-
-    private fun attachToActivity(binding: ActivityPluginBinding) {
-        activityBinding = binding
-        activityBinding!!.activity.bindService(
-            Intent(
-                binding.activity,
-                FlutterLocationService::class.java
-            ), serviceConnection, Context.BIND_AUTO_CREATE
-        )
-    }
-
-    private fun detachActivity() {
-        locationService?.removeLocationUpdates()
-        activityBinding!!.activity.unbindService(serviceConnection)
-        activityBinding = null
-    }
-
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
