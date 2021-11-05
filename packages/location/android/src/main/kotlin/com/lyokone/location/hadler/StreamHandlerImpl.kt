@@ -24,6 +24,7 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
             Log.wtf(TAG, "Setting a method call handler before the last was disposed.")
             stopListening()
         }
+        Log.d(TAG, "startListening called")
 
         channel = EventChannel(messenger, STREAM_CHANNEL_NAME).apply {
             setStreamHandler(this@StreamHandlerImpl)
@@ -38,6 +39,8 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
             Log.d(TAG, "Tried to stop listening when no MethodChannel had been initialized.")
             return
         }
+        Log.d(TAG, "stopListening called")
+
 
         channel?.setStreamHandler(null)
         channel = null
@@ -45,9 +48,13 @@ class StreamHandlerImpl : EventChannel.StreamHandler {
 
     override fun onListen(arguments: Any?, eventsSink: EventSink) {
         locationService?.requestLocationUpdates(sink = eventsSink)
+
+        Log.d(TAG, "onListen called")
     }
 
     override fun onCancel(arguments: Any?) {
         locationService?.cancelStream()
+
+        Log.d(TAG, "onCancel called")
     }
 }

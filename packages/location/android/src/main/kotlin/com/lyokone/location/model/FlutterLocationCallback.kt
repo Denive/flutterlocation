@@ -25,7 +25,7 @@ class MethodFlutterLocationCallback(
 ) : FlutterLocationCallback(fusedLocationClient) {
     private val cts = CancellationTokenSource()
 
-    private var isSend = false;
+    private var isSend = false
 
     init {
         requestLocation(settings.locationAccuracy)
@@ -70,6 +70,10 @@ class StreamFlutterLocationCallback(
     private val locationCallback = createLocationCallback(sink)
     private val mainHandler = Handler(mainLooper)
 
+    companion object {
+        private const val TAG = "StreamLocationCallback"
+    }
+
     init {
         requestLocation(settings)
     }
@@ -80,6 +84,7 @@ class StreamFlutterLocationCallback(
     }
 
     override fun dispose(errorData: ErrorData?) {
+        Log.d(TAG, "dispose called. Location stream closed.")
         if (errorData != null)
             sink.error(errorData.errorCode, errorData.errorMessage, null)
 
@@ -95,6 +100,7 @@ class StreamFlutterLocationCallback(
                 locationCallback,
                 looper
             )
+            Log.d(TAG, "location requestedLocation.")
         } catch (unlikely: SecurityException) {
             sink.error(
                 "PERMISSION_DENIED",
@@ -102,6 +108,7 @@ class StreamFlutterLocationCallback(
                 null
             )
             sink.endOfStream()
+            Log.d(TAG, "PERMISSION_DENIED: location stream closed.")
         }
     }
 
@@ -109,6 +116,7 @@ class StreamFlutterLocationCallback(
      * Sets up the location request. Android has two location request settings:
      */
     private fun createLocationRequest(settings: LocationSettings): LocationRequest {
+        Log.d(TAG, "createLocationRequest called")
         return LocationRequest.create()
             .setInterval(settings.updateIntervalMilliseconds.toLong())
             .setFastestInterval(settings.fastestUpdateIntervalMilliseconds.toLong())
@@ -117,11 +125,17 @@ class StreamFlutterLocationCallback(
     }
 
     private fun createLocationCallback(sink: EventChannel.EventSink): LocationCallback {
+
         return object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-
                 val location = LocationData(locationResult.lastLocation)
+
+
+                Log.d(
+                    TAG,
+                    "location received. latitude: ${location.latitude} longitude: ${location.longitude}"
+                )
 
                 mainHandler.post {
                     sink.success(location.toMap())

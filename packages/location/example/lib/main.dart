@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:location_example/change_settings.dart';
 import 'package:location_example/enable_in_background.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'change_notification.dart';
 import 'get_location.dart';
@@ -49,14 +48,13 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 const Text('Created by Guillaume Bernos'),
                 InkWell(
+                  onTap: () {},
                   child: const Text(
                     'https://github.com/Lyokone/flutterlocation',
                     style: TextStyle(
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  onTap: () =>
-                      launch('https://github.com/Lyokone/flutterlocation'),
                 ),
               ],
             ),

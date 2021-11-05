@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.lyokone.location.model.*
@@ -20,6 +21,8 @@ class FlutterLocation(
     companion object {
         private const val ONE_LOCATION_CALLBACK = 1
         private const val STREAM_LOCATION_CALLBACK = 2
+
+        private const val TAG = "FlutterLocation"
     }
 
     private val locationManager =
@@ -28,7 +31,6 @@ class FlutterLocation(
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
     private var settings = LocationSettings()
-    var isForegroundLocationEnabled = false
 
     private var callbacks = mutableMapOf<Int, FlutterLocationCallback?>(
         ONE_LOCATION_CALLBACK to null,
@@ -36,6 +38,7 @@ class FlutterLocation(
     )
 
     fun changeSettings(updatedSettings: LocationSettings) {
+        Log.d(TAG, "changeSettings called: settings : $updatedSettings")
         settings = updatedSettings
         callbacks[STREAM_LOCATION_CALLBACK]?.updateSettings(settings)
     }
@@ -77,17 +80,20 @@ class FlutterLocation(
     }
 
     fun startRequestingLocation(sink: EventSink) {
+        Log.d(TAG, "startRequestingLocation called")
         callbacks[STREAM_LOCATION_CALLBACK]?.dispose()
         callbacks[STREAM_LOCATION_CALLBACK] =
             StreamFlutterLocationCallback(sink, lopper, mainLooper, fusedLocationClient, settings)
     }
 
     fun cancelRequestingLocation() {
+        Log.d(TAG, "cancelRequestingLocation called")
         callbacks[STREAM_LOCATION_CALLBACK]?.dispose()
     }
 
 
     fun dispose(error: ErrorData? = null) {
+        Log.d(TAG, "dispose called")
         callbacks.values.takeWhile { it != null }.forEach {
             it?.dispose(error)
         }

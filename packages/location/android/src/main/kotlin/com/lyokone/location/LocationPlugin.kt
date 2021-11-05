@@ -27,6 +27,7 @@ class LocationPlugin : FlutterPlugin {
     private var locationService: FlutterLocationService? = null
 
     override fun onAttachedToEngine(binding: FlutterPluginBinding) {
+        Log.d(TAG, "onAttachedToEngine called")
         binding.applicationContext.bindService(
             Intent(binding.applicationContext, FlutterLocationService::class.java),
             serviceConnection,
@@ -43,6 +44,7 @@ class LocationPlugin : FlutterPlugin {
     }
 
     override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
+        Log.d(TAG, "onDetachedFromEngine called")
         methodCallHandler?.stopListening()
         methodCallHandler = null
 
