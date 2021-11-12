@@ -1,4 +1,4 @@
-package com.lyokone.location;
+package com.lyokone.location.deprecated;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -46,7 +46,6 @@ public class FlutterLocation
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
-
     private static final int GPS_ENABLE_REQUEST = 0x1001;
 
     public FusedLocationProviderClient mFusedLocationClient;

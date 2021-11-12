@@ -1,6 +1,7 @@
-package com.lyokone.location;
+package com.lyokone.location.deprecated;
 
 import android.util.Log;
+
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.StreamHandler;
