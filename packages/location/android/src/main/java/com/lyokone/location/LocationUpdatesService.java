@@ -42,6 +42,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.lyokone.location.models.LocationData;
+import com.lyokone.location.models.SettingsData;
 
 import io.flutter.plugin.common.EventChannel;
 
@@ -60,7 +61,6 @@ import io.flutter.plugin.common.EventChannel;
  * notification associated with that service is removed.
  */
 public class LocationUpdatesService extends Service implements EventChannel.StreamHandler {
-
     /**
      * Class used for the client Binder.  Since this service runs in the same process as its
      * clients, we don't need to deal with IPC.
@@ -91,18 +91,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
     private final IBinder mBinder = new LocalBinder();
     private EventChannel.EventSink events;
 
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-
-    /**
-     * The fastest rate for active location updates. Updates will never be more frequent
-     * than this value.
-     */
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
-            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
+    private SettingsData settings = SettingsData.blank();
     /**
      * The identifier for the notification displayed for the foreground service.
      */
@@ -114,6 +103,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
      * place.
      */
     private boolean mChangingConfiguration = false;
+    private boolean isForegroundServiceEnabled = false;
 
     private NotificationManager mNotificationManager;
 
@@ -139,7 +129,22 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
      */
     private Location mLocation;
 
-    public LocationUpdatesService() {
+    public boolean isBackgroundMode() {
+        return isForegroundServiceEnabled;
+    }
+
+    public void isBackgroundMode(boolean isForegroundServiceEnabled) {
+        this.isForegroundServiceEnabled = isForegroundServiceEnabled;
+
+        if(!isForegroundServiceEnabled) {
+            stopForeground(true);
+        }
+    }
+
+    public void changeSettings(SettingsData settings) {
+        this.settings = settings;
+        removeLocationUpdates();
+        requestLocationUpdates();
     }
 
     @Override
@@ -224,7 +229,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
         // Called when the last client (MainActivity in case of this sample) unbinds from this
         // service. If this method is called due to a configuration change in MainActivity, we
         // do nothing. Otherwise, we make this service a foreground service.
-        if (!mChangingConfiguration && Utils.requestingLocationUpdates(this)) {
+        if (isForegroundServiceEnabled && !mChangingConfiguration && Utils.requestingLocationUpdates(this)) {
             Log.i(TAG, "Starting foreground service");
 
             startForeground(NOTIFICATION_ID, getNotification());
@@ -333,9 +338,10 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
      */
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(settings.updateIntervalMilliseconds);
+        mLocationRequest.setFastestInterval(settings.fastestUpdateIntervalMilliseconds);
+        mLocationRequest.setPriority(settings.locationAccuracy);
+        mLocationRequest.setSmallestDisplacement(settings.distanceFilter);
     }
 
     /**

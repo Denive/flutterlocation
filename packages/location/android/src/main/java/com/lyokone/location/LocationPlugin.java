@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.location.LocationManager;
 import android.os.Build;
@@ -23,6 +22,7 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.Task;
+import com.lyokone.location.models.SettingsData;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -150,11 +150,11 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
             case "changeNotificationOptions":
                 changeNotificationOptions(call, result);
                 break;
+            case "changeSettings":
+                changeSettings(SettingsData.fromCall(call), result);
+                break;
 
             // TODO add later
-            case "changeSettings":
-                changeSettings(call, result);
-                break;
             case "hasPermission":
                 onHasPermission(result);
                 break;
@@ -182,17 +182,13 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
 
     }
 
-    public void changeSettings(MethodCall call, MethodChannel.Result result) {
-//        this.locationAccuracy = newLocationAccuracy;
-//        this.updateIntervalMilliseconds = updateIntervalMilliseconds;
-//        this.fastestUpdateIntervalMilliseconds = fastestUpdateIntervalMilliseconds;
-//        this.distanceFilter = distanceFilter;
-//
-//        createLocationCallback();
-//        createLocationRequest();
-//        buildLocationSettingsRequest();
-//        startRequestingLocation();
-        result.success(1);
+    public void changeSettings(SettingsData settings, MethodChannel.Result result) {
+        if (service != null) {
+            service.changeSettings(settings);
+            result.success(1);
+        } else {
+            result.success(0);
+        }
     }
 
     private void onRequestPermission(MethodChannel.Result result) {
@@ -204,14 +200,36 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
     }
 
     private void enableBackgroundMode(MethodCall call, MethodChannel.Result result) {
-        result.success(1);
+        if (service != null) {
+            final Boolean enableBackgroundMode = call.argument("enable");
+
+            service.isBackgroundMode(enableBackgroundMode != null ? enableBackgroundMode : false);
+        } else {
+            result.success(0);
+        }
     }
 
     private void isBackgroundModeEnabled(MethodChannel.Result result) {
-        result.success(1);
+        if (service != null) {
+            result.success(service.isBackgroundMode() ? 1 : 0);
+        } else {
+            result.success(0);
+        }
     }
 
     private void changeNotificationOptions(MethodCall call, MethodChannel.Result result) {
+//        final SettingsData settings = new SettingsData(call);
+//        final Integer locationAccuracy = call.argument("accuracy");
+//        final Long updateIntervalMilliseconds = (Long) call.argument("interval");
+//
+//        if (updateIntervalMilliseconds != null) {
+//            final Long fastestUpdateIntervalMilliseconds = updateIntervalMilliseconds / 2;
+//        }
+//
+//        final Double distanceFilter = call.argument("distanceFilter");
+
+
+        result.success(1);
     }
 
     private void checkServiceEnabled(final @NonNull MethodChannel.Result result) {
