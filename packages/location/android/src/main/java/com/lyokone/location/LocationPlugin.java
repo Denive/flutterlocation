@@ -192,6 +192,7 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
 //        createLocationRequest();
 //        buildLocationSettingsRequest();
 //        startRequestingLocation();
+        result.success(1);
     }
 
     private void onRequestPermission(MethodChannel.Result result) {
@@ -203,11 +204,11 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
     }
 
     private void enableBackgroundMode(MethodCall call, MethodChannel.Result result) {
-
+        result.success(1);
     }
 
     private void isBackgroundModeEnabled(MethodChannel.Result result) {
-
+        result.success(1);
     }
 
     private void changeNotificationOptions(MethodCall call, MethodChannel.Result result) {
