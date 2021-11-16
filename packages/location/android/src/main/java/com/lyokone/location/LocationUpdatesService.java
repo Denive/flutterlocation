@@ -151,6 +151,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: " + settings.toString());
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationCallback = new LocationCallback() {
@@ -183,7 +184,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Service started");
+        Log.i(TAG, "Service started " + settings.toString());
         boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
                 false);
 
@@ -197,8 +198,8 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
 
         if(settingsData != null) {
             settings = settingsData;
+        Log.i(TAG, "Settings updated " + settings.toString());
         }
-
         // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
     }
@@ -348,6 +349,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
      * Sets the location request parameters.
      */
     private void createLocationRequest() {
+        Log.i(TAG, "createLocationRequest " + settings.toString());
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(settings.updateIntervalMilliseconds);
         mLocationRequest.setFastestInterval(settings.fastestUpdateIntervalMilliseconds);

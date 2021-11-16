@@ -115,4 +115,14 @@ public class SettingsData implements Parcelable {
             dest.writeFloat(distanceFilter);
         }
     }
+
+    @Override
+    public String toString() {
+        return "SettingsData{" +
+                "locationAccuracy=" + locationAccuracy +
+                ", updateIntervalMilliseconds=" + updateIntervalMilliseconds +
+                ", fastestUpdateIntervalMilliseconds=" + fastestUpdateIntervalMilliseconds +
+                ", distanceFilter=" + distanceFilter +
+                '}';
+    }
 }
