@@ -1,65 +1,56 @@
 package com.lyokone.location.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.SparseArray;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.location.LocationRequest;
 
 import io.flutter.plugin.common.MethodCall;
 
-public class SettingsData implements Parcelable {
-    private static final Integer DEFAULT_LOCATION_ACCURACY = LocationRequest.PRIORITY_HIGH_ACCURACY;
-    private static final Long DEFAULT_UPDATE_INTERVAL = 5000L;
-    private static final Float DEFAULT_DISTANCE_FILTER = 0f;
+public class SettingsData {
+    private static final Integer DEFAULT_FLUTTER_LOCATION_ACCURACY = 4;
+    private static final Integer DEFAULT_UPDATE_INTERVAL = 5000;
+    private static final Double DEFAULT_DISTANCE_FILTER = 0.0;
 
     final public Integer locationAccuracy;
     final public Long updateIntervalMilliseconds;
     final public Long fastestUpdateIntervalMilliseconds;
     final public Float distanceFilter;
 
+
     private SettingsData(
             final Integer locationAccuracy,
-            final Long updateIntervalMilliseconds,
-            final Float distanceFilter
+            final Integer updateIntervalMilliseconds,
+            final Double distanceFilter
     ) {
-        this.locationAccuracy = locationAccuracy != null ? locationAccuracy : DEFAULT_LOCATION_ACCURACY;
-        this.updateIntervalMilliseconds = updateIntervalMilliseconds != null ? updateIntervalMilliseconds : DEFAULT_UPDATE_INTERVAL;
+        SparseArray<Integer> mapFlutterAccuracy = new SparseArray<Integer>() {
+            {
+                put(0, LocationRequest.PRIORITY_NO_POWER);
+                put(1, LocationRequest.PRIORITY_LOW_POWER);
+                put(2, LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+                put(3, LocationRequest.PRIORITY_HIGH_ACCURACY);
+                put(4, LocationRequest.PRIORITY_HIGH_ACCURACY);
+                put(5, LocationRequest.PRIORITY_LOW_POWER);
+            }
+        };
+
+        this.locationAccuracy = mapFlutterAccuracy.get(locationAccuracy != null ? locationAccuracy : DEFAULT_FLUTTER_LOCATION_ACCURACY);
+        this.updateIntervalMilliseconds = (updateIntervalMilliseconds != null ? updateIntervalMilliseconds : DEFAULT_UPDATE_INTERVAL).longValue();
         this.fastestUpdateIntervalMilliseconds = this.updateIntervalMilliseconds / 2;
-        this.distanceFilter = distanceFilter != null ? distanceFilter : DEFAULT_DISTANCE_FILTER;
+        this.distanceFilter = (distanceFilter != null ? distanceFilter : DEFAULT_DISTANCE_FILTER).floatValue();
     }
 
-    protected SettingsData(Parcel in) {
-        if (in.readByte() == 0) {
-            locationAccuracy = null;
-        } else {
-            locationAccuracy = in.readInt();
-        }
-        if (in.readByte() == 0) {
-            updateIntervalMilliseconds = null;
-        } else {
-            updateIntervalMilliseconds = in.readLong();
-        }
-        if (in.readByte() == 0) {
-            fastestUpdateIntervalMilliseconds = null;
-        } else {
-            fastestUpdateIntervalMilliseconds = in.readLong();
-        }
-        if (in.readByte() == 0) {
-            distanceFilter = null;
-        } else {
-            distanceFilter = in.readFloat();
-        }
-    }
 
     public static SettingsData fromCall(MethodCall call) {
         Integer locationAccuracy = null;
-        Long updateIntervalMilliseconds = null;
-        Float distanceFilter = null;
+        Integer updateIntervalMilliseconds = null;
+        Double distanceFilter = null;
 
         try {
             locationAccuracy = call.argument("accuracy");
-            updateIntervalMilliseconds = (Long) call.argument("interval");
-            distanceFilter = (Float) call.argument("distanceFilter");
+            updateIntervalMilliseconds = call.argument("interval");
+            distanceFilter = call.argument("distanceFilter");
         } catch (ClassCastException ignore) {
         }
 
@@ -68,54 +59,10 @@ public class SettingsData implements Parcelable {
 
 
     public static SettingsData blank() {
-        return new SettingsData(DEFAULT_LOCATION_ACCURACY, DEFAULT_UPDATE_INTERVAL, DEFAULT_DISTANCE_FILTER);
+        return new SettingsData(DEFAULT_FLUTTER_LOCATION_ACCURACY, DEFAULT_UPDATE_INTERVAL, DEFAULT_DISTANCE_FILTER);
     }
 
-    public static final Creator<SettingsData> CREATOR = new Creator<SettingsData>() {
-        @Override
-        public SettingsData createFromParcel(Parcel in) {
-            return new SettingsData(in);
-        }
-
-        @Override
-        public SettingsData[] newArray(int size) {
-            return new SettingsData[size];
-        }
-    };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (locationAccuracy == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeInt(locationAccuracy);
-        }
-        if (updateIntervalMilliseconds == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(updateIntervalMilliseconds);
-        }
-        if (fastestUpdateIntervalMilliseconds == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(fastestUpdateIntervalMilliseconds);
-        }
-        if (distanceFilter == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeFloat(distanceFilter);
-        }
-    }
-
+    @NonNull
     @Override
     public String toString() {
         return "SettingsData{" +
