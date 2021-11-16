@@ -138,13 +138,15 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
     public void isBackgroundMode(boolean isForegroundServiceEnabled) {
         this.isForegroundServiceEnabled = isForegroundServiceEnabled;
 
-        if(!isForegroundServiceEnabled) {
+        if (!isForegroundServiceEnabled) {
             stopForeground(true);
         }
     }
 
     public void changeSettings(SettingsData settings) {
         this.settings = settings;
+
+        Log.d(TAG, "changeSettings: " + settings.toString());
         removeLocationUpdates();
         requestLocationUpdates();
     }
@@ -196,9 +198,9 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
             stopSelf();
         }
 
-        if(settingsData != null) {
+        if (settingsData != null) {
             settings = settingsData;
-        Log.i(TAG, "Settings updated " + settings.toString());
+            Log.i(TAG, "Settings updated " + settings.toString());
         }
         // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
