@@ -87,6 +87,8 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
     static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
             ".started_from_notification";
+    private static final String EXTRA_SETTINGS = PACKAGE_NAME +
+            ".settings";
 
     private final IBinder mBinder = new LocalBinder();
     private EventChannel.EventSink events;
@@ -185,11 +187,18 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
         boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
                 false);
 
+        SettingsData settingsData = intent.getParcelableExtra(EXTRA_SETTINGS);
+
         // We got here because the user decided to remove location updates from the notification.
         if (startedFromNotification) {
             removeLocationUpdates();
             stopSelf();
         }
+
+        if(settingsData != null) {
+            settings = settingsData;
+        }
+
         // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
     }
@@ -249,7 +258,9 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
     public void requestLocationUpdates() {
         Log.i(TAG, "Requesting location updates");
         Utils.setRequestingLocationUpdates(this, true);
-        startService(new Intent(getApplicationContext(), LocationUpdatesService.class));
+        final Intent intent = new Intent(getApplicationContext(), LocationUpdatesService.class);
+        intent.putExtra(EXTRA_SETTINGS, settings);
+        startService(intent);
         try {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                     mLocationCallback, Looper.myLooper());
