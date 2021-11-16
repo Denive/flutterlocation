@@ -204,6 +204,8 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware, MethodChann
             final Boolean enableBackgroundMode = call.argument("enable");
 
             service.isBackgroundMode(enableBackgroundMode != null ? enableBackgroundMode : false);
+
+            result.success(1);
         } else {
             result.success(0);
         }
