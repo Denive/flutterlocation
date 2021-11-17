@@ -349,7 +349,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
         mLocationRequest.setInterval(settings.updateIntervalMilliseconds);
         mLocationRequest.setFastestInterval(settings.fastestUpdateIntervalMilliseconds);
         mLocationRequest.setPriority(settings.locationAccuracy);
-        mLocationRequest.setSmallestDisplacement(settings.distanceFilter);
+//        mLocationRequest.setSmallestDisplacement(settings.distanceFilter);
     }
 
     /**
