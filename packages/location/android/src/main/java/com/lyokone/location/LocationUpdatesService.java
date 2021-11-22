@@ -297,6 +297,7 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
                 .setContentText(text)
                 .setContentTitle("SOME TITLE")
                 .setOngoing(true)
+                .setNotificationSilent()
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.drawable.navigation_empty_icon)
                 .setTicker(text)
