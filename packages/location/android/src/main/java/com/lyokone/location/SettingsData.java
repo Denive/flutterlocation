@@ -1,4 +1,4 @@
-package com.lyokone.location.models;
+package com.lyokone.location;
 
 import android.util.SparseArray;
 

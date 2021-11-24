@@ -41,8 +41,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.lyokone.location.models.LocationData;
-import com.lyokone.location.models.SettingsData;
 
 import io.flutter.plugin.common.EventChannel;
 
@@ -288,19 +286,16 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
     private Notification getNotification() {
         Intent intent = new Intent(this, LocationUpdatesService.class);
 
-        CharSequence text = Utils.getLocationText(mLocation);
-
         // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentText(text)
-                .setContentTitle("SOME TITLE")
+                .setContentText("Location is being tracked for ICE")
                 .setOngoing(true)
                 .setNotificationSilent()
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.drawable.navigation_empty_icon)
-                .setTicker(text)
+                .setTicker("Location is being tracked for ICE")
                 .setWhen(System.currentTimeMillis());
 
         // Set the Channel ID for Android O.
@@ -336,9 +331,9 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
         }
 
         // Update notification content if running as a foreground service.
-        if (serviceIsRunningInForeground(this)) {
-            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
-        }
+//        if (serviceIsRunningInForeground(this)) {
+//            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
+//        }
     }
 
     /**
