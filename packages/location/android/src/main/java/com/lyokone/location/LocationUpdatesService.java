@@ -331,9 +331,9 @@ public class LocationUpdatesService extends Service implements EventChannel.Stre
         }
 
         // Update notification content if running as a foreground service.
-//        if (serviceIsRunningInForeground(this)) {
-//            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
-//        }
+        if (serviceIsRunningInForeground(this)) {
+            mNotificationManager.notify(NOTIFICATION_ID, getNotification());
+        }
     }
 
     /**
