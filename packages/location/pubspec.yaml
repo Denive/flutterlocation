@@ -10,9 +10,6 @@ environment:
 flutter:
   plugin:
     platforms:
-      android:
-        package: com.lyokone.location
-        pluginClass: LocationPlugin
       ios:
         pluginClass: LocationPlugin
       macos:
