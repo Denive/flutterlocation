@@ -69,6 +69,7 @@ class BackgroundNotification(
                     NotificationManager.IMPORTANCE_NONE
             ).apply {
                 lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
